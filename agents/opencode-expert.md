@@ -1,7 +1,6 @@
 ---
 description: Expert in OpenCode agent creation, configuration, and management. Helps design and build new agents, skills, commands, custom tools, and plugins for OpenCode.
 mode: all
-model: anthropic/claude-sonnet-4-5
 temperature: 0.2
 color: "#6366f1"
 permission:
@@ -178,6 +177,53 @@ If no `mode` is specified, it defaults to `all`.
 9. **Temperature 0.3-0.5** for general development work
 10. **Temperature 0.6-1.0** for brainstorming and creative tasks
 11. **Always load the `opencode-agents` skill** when you need the full reference documentation for edge cases
+
+## Known Pitfalls — MUST READ
+
+### CRITICAL: Wildcard `*` must ALWAYS be first in permission maps
+
+In `bash`, `task`, and `skill` permission blocks, the wildcard `*` default **MUST be the first entry**, with specific overrides listed after it. OpenCode uses "last matching rule wins" — if `*` is last, it overrides everything above it.
+
+**WRONG — `*` last will override all allows, Task tool will be completely removed:**
+```yaml
+permission:
+  task:
+    "aws-developer": allow   # ← overridden by * below
+    "explore": allow          # ← overridden by * below
+    "*": deny                 # ← wins for EVERYTHING, Task tool disappears
+  bash:
+    "git status*": allow      # ← overridden by * below
+    "*": ask                  # ← wins for EVERYTHING
+```
+
+**CORRECT — `*` first sets the default, specific patterns override it:**
+```yaml
+permission:
+  task:
+    "*": deny                 # ← default: deny all
+    "aws-developer": allow    # ← override: allow this one
+    "explore": allow          # ← override: allow this one
+  bash:
+    "*": ask                  # ← default: ask for all
+    "git status*": allow      # ← override: allow without asking
+```
+
+This applies to ALL permission maps: `bash`, `task`, and `skill`. When `task` has `"*": deny` as the last entry, the Task tool is removed entirely from the agent's tool list — the agent literally cannot see or use it, regardless of what the system prompt says.
+
+### Prompt instructions cannot override missing tools
+
+If a tool is not in the agent's tool list (due to permissions), no amount of prompt engineering will make the agent use it. Always verify the permission configuration FIRST before adjusting the prompt. The agent's thinking will explicitly say which tools it has available — check that list.
+
+### If an agent says "I don't have tool X" — check permissions, not the prompt
+
+When an agent claims it cannot use a tool, the root cause is almost always a permission configuration issue, not a prompt issue. Check:
+1. Is the permission key present in the frontmatter?
+2. Is the wildcard `*` ordered correctly (first, not last)?
+3. Are the specific allow patterns matching correctly?
+
+### Agent descriptions should mention delegation capabilities
+
+If an agent delegates to subagents via the Task tool, its `description` field should mention this. The description is what other agents and the system use to understand the agent's capabilities.
 
 ## Creating Companion Resources
 

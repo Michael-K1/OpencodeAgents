@@ -11,6 +11,7 @@ color: "#DD3522"
 permission:
   edit: deny
   bash:
+    "*": ask
     "aws configure *": allow
     "aws sts *": allow
     # IAM analysis
@@ -96,12 +97,11 @@ permission:
     # Logs
     "aws logs describe-*": allow
     "aws logs list-*": allow
-    "*": ask
   webfetch: allow
   task:
+    "*": deny
     "aws-librarian": allow
     "explore": allow
-    "*": deny
   skill:
     "*": allow
 ---

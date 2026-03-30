@@ -11,6 +11,7 @@ color: "#1B660F"
 permission:
   edit: deny
   bash:
+    "*": ask
     "aws ce *": allow
     "aws cur *": allow
     "aws pricing *": allow
@@ -36,12 +37,11 @@ permission:
     "aws dynamodb describe-*": allow
     "aws opensearch describe-*": allow
     "aws organizations describe-* list-*": allow
-    "*": ask
   webfetch: allow
   task:
+    "*": deny
     "aws-librarian": allow
     "explore": allow
-    "*": deny
   skill:
     "*": allow
 ---

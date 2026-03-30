@@ -8,10 +8,11 @@ description: >
   Invoke for "how do we implement this on AWS?".
 mode: all
 temperature: 0.3
-color: "#232F3E"
+color: "#00A1C9"
 permission:
   edit: ask
   bash:
+    "*": ask
     "aws * list-*": allow
     "aws * describe-*": allow
     "aws * get-*": allow
@@ -40,9 +41,9 @@ permission:
     "git status*": allow
     "git diff*": allow
     "git log*": allow
-    "*": ask
   webfetch: allow
   task:
+    "*": deny
     "terraform-expert": allow
     "serverless-v3-expert": allow
     "serverless-v4-expert": allow
@@ -50,7 +51,6 @@ permission:
     "cfn-expert": allow
     "aws-librarian": allow
     "explore": allow
-    "*": deny
   skill:
     "*": allow
 ---

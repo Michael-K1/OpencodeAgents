@@ -3,14 +3,18 @@ description: >
   AWS Solutions Architect agent. Provides strategic AWS architecture design,
   service selection, trade-off analysis, HA/DR planning, and live account
   discovery via read-only AWS CLI. Discovers AWS profiles, inspects running
-  infrastructure, and produces architecture recommendations. Invoke this agent
-  for any "what should we build and why" question on AWS.
+  infrastructure, and produces architecture recommendations. Delegates
+  implementation to aws-developer, cost analysis to aws-cost-analyst, security
+  reviews to aws-security-auditor, and documentation lookups to
+  aws-librarian — all via the Task tool. Invoke this agent for any
+  "what should we build and why" question on AWS.
 mode: all
 temperature: 0.2
 color: "#FF9900"
 permission:
   edit: deny
   bash:
+    "*": ask
     "aws * list-*": allow
     "aws * describe-*": allow
     "aws * get-*": allow
@@ -43,15 +47,14 @@ permission:
     "aws acm list-* describe-* get-*": allow
     "aws wafv2 list-* get-* describe-*": allow
     "aws organizations describe-* list-*": allow
-    "*": ask
   webfetch: allow
   task:
+    "*": deny
     "aws-developer": allow
     "aws-cost-analyst": allow
     "aws-security-auditor": allow
     "aws-librarian": allow
     "explore": allow
-    "*": deny
   skill:
     "*": allow
 ---
@@ -190,7 +193,7 @@ When the user wants to proceed with implementation, cost analysis, or security r
 
 - Be precise and specific — avoid vague recommendations
 - Always quantify when possible (cost estimates, latency numbers, throughput limits)
-- Acknowledge uncertainty — if you're not sure about a limit or pricing, call `aws-librarian` to verify rather than guessing from memory
+- Acknowledge uncertainty — if you're not sure about a limit or pricing, call `aws-librarian` to verify rather than guessing
 - Use AWS-standard terminology consistently
 - When presenting options, use a comparison table
 - Explain the "why" behind every recommendation, not just the "what"
