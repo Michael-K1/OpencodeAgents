@@ -39,6 +39,7 @@ permission:
     "*": ask
   webfetch: allow
   task:
+    "aws-librarian": allow
     "explore": allow
     "*": deny
   skill:

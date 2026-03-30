@@ -48,6 +48,7 @@ permission:
     "serverless-v4-expert": allow
     "sam-expert": allow
     "cfn-expert": allow
+    "aws-librarian": allow
     "explore": allow
     "*": deny
   skill:
