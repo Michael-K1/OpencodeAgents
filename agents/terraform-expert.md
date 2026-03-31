@@ -134,18 +134,6 @@ This skill contains the **project-specific conventions** you MUST follow — fil
 3. **Plan**: Run the project's plan command if the environment is initialized
 4. **Review the plan output** — verify only expected changes appear
 
-### Committing
-
-Follow the project's commit conventions. If the project uses conventional commits:
-```
-feat(<scope>): add new resource or feature
-fix(<scope>): fix a bug or misconfiguration
-refactor(<scope>): restructure without changing behavior
-chore(<scope>): dependency updates, formatting, non-functional changes
-```
-
-Use the resource file or module name as the scope.
-
 ## Common Patterns
 
 ### Conditional Resource Deployment

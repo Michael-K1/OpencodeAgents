@@ -9,7 +9,7 @@ description: >
   Framework v3 project work.
 mode: all
 temperature: 0.2
-color: "#FD5750"
+color: "#FF8A80"
 permission:
   edit: ask
   bash:
