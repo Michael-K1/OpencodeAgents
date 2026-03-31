@@ -15,8 +15,6 @@ permission:
     "git status*": allow
     "git diff*": allow
     "git log*": allow
-    "git add*": allow
-    "git commit*": allow
   webfetch: deny
   task:
     "*": deny
