@@ -1,69 +1,20 @@
 ---
-name: sync-agents
-description: Sync global OpenCode agents, skills, and commands to the project repo and push
+description: Sync global OpenCode agents, skills, and commands to the project repo
 ---
 
-# Sync Global OpenCode Configuration
+Synchronize global OpenCode configuration from `~/.config/opencode/` to this project repository.
 
-This command synchronizes global OpenCode agents, skills, and commands from `~/.config/opencode/` to the project repository.
+**Targets** (repo root, NOT `.opencode/`):
+- Agents: `~/.config/opencode/agents/*.md` → `agents/`
+- Skills: `~/.config/opencode/skills/*/SKILL.md` → `skills/`
+- Commands: `~/.config/opencode/commands/*.md` → `commands/`
 
-## Usage
+**Arguments provided:** $ARGUMENTS
 
-```
-/sync-agents              # Preview changes (dry-run)
-/sync-agents push         # Sync, commit, and push changes
-/sync-agents --no-push    # Sync and commit without pushing
-```
+Run the sync script based on the arguments:
+- If no arguments were provided: run `./scripts/sync-global-opencode.sh --dry-run` to preview changes
+- If "push": run `./scripts/sync-global-opencode.sh` to sync, commit, and push
+- If "--no-push": run `./scripts/sync-global-opencode.sh --no-push` to sync and commit without pushing
+- If "--verbose" or "-v": add the `--verbose` flag
 
-## What It Does
-
-1. Validates global and project directories
-2. Scans for new and updated:
-   - Agents (`.md` files in `~/.config/opencode/agents/`)
-   - Skills (in `~/.config/opencode/skills/`)
-   - Commands (`.md` files in `~/.config/opencode/commands/`)
-3. Copies changes to project `agents/`, `skills/`, `commands/` directories
-4. Commits with descriptive message
-5. Pushes to remote (if requested)
-
-## Examples
-
-### Preview Changes
-```
-/sync-agents
-```
-
-### Sync and Push
-```
-/sync-agents push
-```
-
-### Sync Without Push
-```
-/sync-agents --no-push
-```
-
-## Output
-
-The command will show:
-- ✓ Number of new agents/skills/commands added
-- ~ Number of agents/skills/commands updated
-- Summary of changes
-- Git commit and push status
-
----
-
-Executing sync operation...
-
-!`cd $OPENCODE_AGENTS_REPO && git status`
-
-## Global Configuration
-
-**Global OpenCode Home**: `$GLOBAL_OPENCODE_HOME`
-**Project Repository**: `$OPENCODE_AGENTS_REPO`
-
-To specify custom paths, set environment variables:
-```bash
-export GLOBAL_OPENCODE_HOME=/custom/opencode/path
-export OPENCODE_AGENTS_REPO=/custom/repo/path
-```
+Report the results to the user in a clear summary table.
