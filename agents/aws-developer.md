@@ -109,7 +109,7 @@ When receiving a task (from user or from `@aws-architect`):
    - **AWS SAM** → `@sam-expert` (for template.yaml SAM projects)
    - **CloudFormation** → `@cfn-expert` (for raw CloudFormation templates)
 4. **Choose the Lambda runtime expert** (if handler code is needed):
-   - **TypeScript** → `@lambda-ts-expert` (ESM, Middy v6, AWS SDK v3, Vitest)
+   - **TypeScript** → `@lambda-ts-expert` (ESM, Middy v6, Powertools, AWS SDK v3, Vitest)
    - **Python** → `@lambda-python-expert` (boto3, powertools, pytest)
    - **Go** → `@lambda-go-expert` (aws-lambda-go, AWS SDK for Go v2)
 5. **Ask the user** if the IaC tool or runtime choice is unclear
@@ -167,7 +167,7 @@ Pass the implementation brief (or direct instructions) to the appropriate sub-ag
 - `@cfn-expert` — for raw CloudFormation YAML/JSON
 
 **Lambda Expert Agents** (for handler code, business logic, and tests):
-- `@lambda-ts-expert` — for TypeScript Lambda handlers (Node.js 22, ESM, Middy v6, AWS SDK v3, Vitest)
+- `@lambda-ts-expert` — for TypeScript Lambda handlers (Node.js 24, ESM, Middy v6, Powertools, AWS SDK v3, Vitest)
 - `@lambda-python-expert` — for Python Lambda handlers (boto3, Lambda Powertools, pytest)
 - `@lambda-go-expert` — for Go Lambda handlers (aws-lambda-go, AWS SDK for Go v2)
 

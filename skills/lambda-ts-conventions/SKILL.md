@@ -338,6 +338,23 @@ try {
 
 ## 9. Logging
 
+### Powertools Logger (Preferred)
+
+For new code, use `@aws-lambda-powertools/logger` for structured JSON logging. See **Section 15** for full patterns and examples.
+
+```typescript
+import { Logger } from '@aws-lambda-powertools/logger'
+
+const logger = new Logger({ serviceName: 'my-service' })
+
+logger.info('Processing request', { orderId, customerId })
+logger.error('Failed to process', { error: err.message, orderId })
+```
+
+### Legacy Pattern (console.log + inspectObject)
+
+Existing codebases may use `console.log` with `inspectObject()` — this is acceptable for consistency within legacy projects but should not be used in new projects.
+
 ```typescript
 import { inspectObject } from 'functions/utils/general.mjs'
 
@@ -351,11 +368,13 @@ console.warn('[PaginatedScan] No items found in table', tableName)
 ```
 
 **Rules:**
-- Always prefix logs with `[Context]` in square brackets
-- Use `inspectObject()` for any object logging (avoids `[Object object]`)
+- **New projects**: Use Powertools Logger — structured JSON, correlation IDs, log levels, no manual formatting
+- **Legacy projects**: Use `console.log` + `inspectObject()` for consistency with existing code
+- Always prefix logs with `[Context]` in square brackets (legacy pattern)
+- Use `inspectObject()` for any object logging in legacy code (avoids `[Object object]`)
 - Log before AND after AWS SDK calls
-- Use `console.error` for errors, `console.warn` for warnings, `console.log` for info
-- Middy `inputOutputLogger` handles input/output logging automatically
+- Use `console.error` for errors, `console.warn` for warnings, `console.log` for info (legacy)
+- Middy `inputOutputLogger` handles input/output logging automatically (legacy); Powertools `injectLambdaContext` with `logEvent: true` replaces this
 
 ---
 
@@ -470,7 +489,7 @@ await Promise.all(entries.map((entry) =>
     build({
         ...entry,
         platform: 'node',
-        target: 'node22',
+        target: 'node24',
         format: 'esm',
         packages: 'external',   // Dependencies come from Lambda layer
         sourcemap: true,
@@ -484,8 +503,9 @@ await Promise.all(entries.map((entry) =>
 - Auto-discovers handlers from `src/lambda/` — add a new `.mts` file and it builds automatically
 - Each handler bundles into its own directory: `build/<handlerName>/<handlerName>.mjs`
 - Dependencies are external (loaded from Lambda layer, not bundled)
-- Node 22 target, ESM format
+- Node 24 target, ESM format
 - Source maps enabled for debugging
+- **Tracer ESM compatibility**: When using `@aws-lambda-powertools/tracer`, add esbuild `banner` option: `import { createRequire } from 'module';const require = createRequire(import.meta.url);` — required because `aws-xray-sdk` is CommonJS
 
 ---
 
@@ -495,6 +515,13 @@ await Promise.all(entries.map((entry) =>
 - `@aws-sdk/client-*` v3 — AWS service clients
 - `@aws-sdk/lib-dynamodb` — DynamoDB Document Client
 - `@aws-sdk/s3-request-presigner` — S3 presigned URLs
+- `@aws-lambda-powertools/logger` — Structured JSON logging
+- `@aws-lambda-powertools/tracer` — X-Ray tracing
+- `@aws-lambda-powertools/metrics` — CloudWatch EMF metrics
+- `@aws-lambda-powertools/parameters` — Cached parameter fetching (SSM, Secrets Manager, AppConfig)
+- `@aws-lambda-powertools/idempotency` — DynamoDB-backed idempotency
+- `@aws-lambda-powertools/batch` — Partial failure handling (SQS, Kinesis, DynamoDB Streams)
+- `@aws-lambda-powertools/parser` — Zod-based event parsing
 - `@middy/core` v6 + middleware packages
 - `lodash-es` — utility functions (prefer over manual implementations)
 - `luxon` — date/time handling (never use raw Date)
@@ -513,14 +540,384 @@ await Promise.all(entries.map((entry) =>
 
 ## 14. Environment and Node Version
 
-- **Node.js**: 22.x (pinned via Volta: `22.17.0`)
-- **npm**: 11.x (pinned via Volta: `11.4.2`)
-- **Runtime**: `nodejs22.x` Lambda runtime
+- **Node.js**: 24.x (pinned via Volta)
+- **npm**: 11.x (pinned via Volta)
+- **Runtime**: `nodejs24.x` Lambda runtime
 - **Region**: `eu-central-1` (default in SDK clients)
 
 ---
 
-## 15. CloudFormation Conventions
+## 15. AWS Lambda Powertools for TypeScript
+
+Powertools provides a suite of utilities that implement AWS best practices for Lambda functions. All utilities use **Middy v6 middleware** pattern and compose natively with the existing Middifier architecture.
+
+### Core Packages
+
+| Package | Purpose | Middy Middleware |
+|---------|---------|-----------------|
+| `@aws-lambda-powertools/logger` | Structured JSON logging | `injectLambdaContext` |
+| `@aws-lambda-powertools/tracer` | X-Ray tracing | `captureLambdaHandler` |
+| `@aws-lambda-powertools/metrics` | CloudWatch EMF metrics | `logMetrics` |
+| `@aws-lambda-powertools/parameters` | SSM/Secrets/AppConfig caching | N/A (direct calls) |
+| `@aws-lambda-powertools/idempotency` | DynamoDB-backed idempotency | `makeHandlerIdempotent` |
+| `@aws-lambda-powertools/batch` | Partial failure handling | N/A (function call) |
+| `@aws-lambda-powertools/parser` | Zod-based event parsing | N/A (used with batch) |
+
+### Environment Variables
+
+Set these in your Lambda function configuration (CloudFormation, SAM, Serverless, Terraform):
+
+```yaml
+Environment:
+  Variables:
+    POWERTOOLS_SERVICE_NAME: my-service        # Required — shared across all utilities
+    POWERTOOLS_LOG_LEVEL: INFO                 # DEBUG, INFO, WARN, ERROR, CRITICAL, SILENT
+    POWERTOOLS_METRICS_NAMESPACE: MyApp        # CloudWatch metrics namespace
+    POWERTOOLS_DEV: "false"                    # Pretty-print logs in dev (set "true" locally)
+    POWERTOOLS_TRACE_ENABLED: "true"           # Enable/disable X-Ray tracing
+```
+
+### Logger
+
+Replaces `console.log` + `inspectObject()` with structured JSON output including correlation IDs, Lambda context, and log levels.
+
+```typescript
+import { Logger } from '@aws-lambda-powertools/logger'
+import { injectLambdaContext } from '@aws-lambda-powertools/logger/middleware'
+
+// Module-scope — persists across warm invocations
+const logger = new Logger({ serviceName: 'my-service' })
+
+// In Middifier chain:
+middy<APIGatewayProxyEvent, APIGatewayProxyResult>()
+    .use(injectLambdaContext(logger, { logEvent: true }))
+    // ... other middleware
+    .handler(baseHandler)
+
+// Usage in handler/business logic:
+logger.info('Processing request', { orderId, customerId })
+logger.error('Failed to process', { error: err.message, orderId })
+logger.warn('Approaching rate limit', { currentRate, threshold })
+logger.debug('DynamoDB response', { response })
+
+// Child loggers for service modules:
+const childLogger = logger.createChild({ persistentLogAttributes: { module: 'dynamodb' } })
+
+// Log buffering — buffer DEBUG/INFO logs, flush on error:
+const logger = new Logger({ logLevel: 'WARN', logBuffering: { enabled: true, flushOnErrorLog: true } })
+logger.debug('This is buffered and only flushed if an error occurs')
+logger.error('Error occurred!') // Flushes all buffered logs
+
+// Correlation IDs — automatically injected from event headers (x-correlation-id):
+logger.info('Request received') // Includes correlation_id in structured output
+```
+
+**Logger rules:**
+- Instantiate at module scope, never inside the handler
+- Use `injectLambdaContext` middleware to add Lambda context to all logs
+- Use `logEvent: true` in non-production for debugging (replaces `inputOutputLogger`)
+- Use child loggers in service modules with `persistentLogAttributes`
+- Use log buffering in production to reduce log volume while preserving debug info on errors
+
+### Tracer
+
+Instruments Lambda functions and AWS SDK clients with X-Ray tracing.
+
+```typescript
+import { Tracer } from '@aws-lambda-powertools/tracer'
+import { captureLambdaHandler } from '@aws-lambda-powertools/tracer/middleware'
+
+// Module-scope
+const tracer = new Tracer({ serviceName: 'my-service' })
+
+// Patch AWS SDK v3 clients for automatic trace capture:
+import { S3Client } from '@aws-sdk/client-s3'
+const s3Client = tracer.captureAWSv3Client(new S3Client({ region: 'eu-central-1' }))
+
+// In Middifier chain:
+middy<APIGatewayProxyEvent, APIGatewayProxyResult>()
+    .use(captureLambdaHandler(tracer))
+    // ... other middleware
+    .handler(baseHandler)
+
+// Manual subsegments for custom tracing:
+const subsegment = tracer.getSegment()?.addNewSubsegment('## processOrder')
+try {
+    const result = await processOrder(orderId)
+    subsegment?.addAnnotation('orderId', orderId)
+    subsegment?.addMetadata('result', result)
+    return result
+} catch (error) {
+    subsegment?.addError(error as Error)
+    throw error
+} finally {
+    subsegment?.close()
+}
+```
+
+**Tracer rules:**
+- Instantiate at module scope, never inside the handler
+- Use `captureAWSv3Client()` to patch SDK clients — do not import `aws-xray-sdk` directly
+- Use annotations for filterable data (strings, numbers, booleans only)
+- Use metadata for non-filterable rich data (objects, arrays)
+- **ESM compatibility**: Add esbuild banner for `aws-xray-sdk` CommonJS: `import { createRequire } from 'module';const require = createRequire(import.meta.url);`
+
+### Metrics
+
+Publishes CloudWatch metrics using Embedded Metric Format (EMF) — zero-cost metric publishing.
+
+```typescript
+import { Metrics, MetricUnit } from '@aws-lambda-powertools/metrics'
+import { logMetrics } from '@aws-lambda-powertools/metrics/middleware'
+
+// Module-scope
+const metrics = new Metrics({
+    namespace: 'MyApp',
+    serviceName: 'my-service',
+    defaultDimensions: { environment: process.env.STAGE ?? 'dev' }
+})
+
+// In Middifier chain:
+middy<APIGatewayProxyEvent, APIGatewayProxyResult>()
+    .use(logMetrics(metrics, { captureColdStartMetric: true }))
+    // ... other middleware
+    .handler(baseHandler)
+
+// Usage in handler/business logic:
+metrics.addMetric('OrderProcessed', MetricUnit.Count, 1)
+metrics.addMetric('ProcessingTime', MetricUnit.Milliseconds, elapsed)
+metrics.addDimension('PaymentMethod', 'credit_card')
+
+// High-resolution metrics (1-second resolution):
+metrics.addMetric('ApiLatency', MetricUnit.Milliseconds, latency)
+```
+
+**Metrics rules:**
+- Instantiate at module scope, never inside the handler
+- Use `logMetrics` middleware — it handles flushing metrics at the end of each invocation
+- Always set `captureColdStartMetric: true` for operational visibility
+- Use `defaultDimensions` for environment/stage — avoids repetition
+- Dimensions are limited to 29 per metric (CloudWatch limit)
+
+### Parameters
+
+Cached parameter fetching from SSM Parameter Store, Secrets Manager, AppConfig, and DynamoDB.
+
+```typescript
+import { getParameter, getParameters } from '@aws-lambda-powertools/parameters/ssm'
+import { getSecret } from '@aws-lambda-powertools/parameters/secrets'
+import { getAppConfig } from '@aws-lambda-powertools/parameters/appconfig'
+
+// SSM Parameter Store — cached for 5 seconds by default:
+const apiEndpoint = await getParameter('/my-app/api-endpoint')
+const dbConfig = await getParameter('/my-app/db-config', { transform: 'json' })
+
+// Fetch multiple parameters by path:
+const allParams = await getParameters('/my-app/')
+
+// Secrets Manager:
+const dbPassword = await getSecret('my-app/db-password')
+const apiKey = await getSecret('my-app/api-key', { transform: 'json' })
+
+// AppConfig:
+const featureFlags = await getAppConfig('my-app', 'production', 'feature-flags', {
+    transform: 'json'
+})
+
+// Cache control:
+const fresh = await getParameter('/my-app/config', { forceFetch: true })
+const longCache = await getParameter('/my-app/config', { maxAge: 300 }) // 5 minutes
+```
+
+**Parameters rules:**
+- Default cache TTL is 5 seconds — override with `maxAge` for stable values
+- Use `forceFetch: true` only when you need the absolute latest value
+- Use `transform: 'json'` for structured values stored as JSON strings
+- Fetch at handler invocation time, not at module scope (values change at runtime)
+
+### Idempotency
+
+DynamoDB-backed idempotency to prevent duplicate processing of the same event.
+
+```typescript
+import { IdempotencyConfig } from '@aws-lambda-powertools/idempotency'
+import { makeHandlerIdempotent } from '@aws-lambda-powertools/idempotency/middleware'
+import { DynamoDBPersistenceLayer } from '@aws-lambda-powertools/idempotency/dynamodb'
+
+// Module-scope
+const persistenceStore = new DynamoDBPersistenceLayer({
+    tableName: process.env.IDEMPOTENCY_TABLE ?? 'idempotency-table'
+})
+const idempotencyConfig = new IdempotencyConfig({
+    eventKeyJmesPath: 'body.orderId',  // Extract idempotency key from event
+    expiresAfterSeconds: 3600          // 1-hour TTL (default)
+})
+
+// In Middifier chain:
+middy<APIGatewayProxyEvent, APIGatewayProxyResult>()
+    .use(makeHandlerIdempotent({ persistenceStore, config: idempotencyConfig }))
+    // ... other middleware
+    .handler(baseHandler)
+```
+
+**Idempotency rules:**
+- Use `eventKeyJmesPath` to extract only the relevant fields from the event for the idempotency key
+- Set `expiresAfterSeconds` based on your business requirements (default: 3600)
+- The DynamoDB table needs `id` (String) as partition key — create via IaC
+- Idempotency works per-function — different handlers should use different table or key expressions
+- Place `makeHandlerIdempotent` middleware **after** parsing/validation middleware so the event is already parsed
+
+### Batch Processing
+
+Partial failure handling for SQS, Kinesis, and DynamoDB Streams — reports individual item failures instead of failing the entire batch.
+
+```typescript
+import { processPartialResponse, SqsFifoPartialProcessor } from '@aws-lambda-powertools/batch'
+import type { SQSHandler, SQSRecord } from 'aws-lambda'
+
+// Standard SQS:
+import { BatchProcessor, EventType } from '@aws-lambda-powertools/batch'
+
+const processor = new BatchProcessor(EventType.SQS)
+
+const recordHandler = async (record: SQSRecord): Promise<void> => {
+    const payload = JSON.parse(record.body) as OrderEvent
+    await processOrder(payload)
+}
+
+const baseHandler: SQSHandler = async (event, context) => {
+    return processPartialResponse(event, recordHandler, processor, { context })
+}
+
+export const handler = SQSMiddifier(baseHandler)
+
+// SQS FIFO — preserves message group ordering:
+const fifoProcessor = new SqsFifoPartialProcessor()
+
+const fifoHandler: SQSHandler = async (event, context) => {
+    return processPartialResponse(event, recordHandler, fifoProcessor, { context })
+}
+```
+
+**Batch rules:**
+- Always use `processPartialResponse` — never manually iterate SQS/Kinesis records
+- For FIFO queues, use `SqsFifoPartialProcessor` to preserve message group ordering
+- Set `ReportBatchItemFailures` in the Lambda event source mapping configuration
+- The processor returns `batchItemFailures` response automatically
+- Test with both successful and failing records to verify partial failure behavior
+
+### Composing Powertools with Existing Middifiers
+
+Powertools middleware composes natively with Middy v6. Update Middifiers to include Powertools:
+
+```typescript
+import middy from '@middy/core'
+import httpHeaderNormalizer from '@middy/http-header-normalizer'
+import httpJsonBodyParser from '@middy/http-json-body-parser'
+import httpCors from '@middy/http-cors'
+import httpResponseSerializer from '@middy/http-response-serializer'
+import httpErrorHandler from '@middy/http-error-handler'
+import errorLogger from '@middy/error-logger'
+import inputOutputLogger from '@middy/input-output-logger'
+
+import type { APIGatewayProxyEvent, APIGatewayProxyResult, Context } from 'aws-lambda'
+
+import { Logger } from '@aws-lambda-powertools/logger'
+import { injectLambdaContext } from '@aws-lambda-powertools/logger/middleware'
+import { Tracer } from '@aws-lambda-powertools/tracer'
+import { captureLambdaHandler } from '@aws-lambda-powertools/tracer/middleware'
+import { Metrics } from '@aws-lambda-powertools/metrics'
+import { logMetrics } from '@aws-lambda-powertools/metrics/middleware'
+
+// Shared instances — module-scope
+const logger = new Logger()
+const tracer = new Tracer()
+const metrics = new Metrics()
+
+export const APIGWMiddifier = (
+    baseHandler: (event: APIGatewayProxyEvent, context?: Context) => Promise<APIGatewayProxyResult>
+) =>
+    middy<APIGatewayProxyEvent, APIGatewayProxyResult>()
+        .use(injectLambdaContext(logger, { logEvent: true }))
+        .use(captureLambdaHandler(tracer))
+        .use(logMetrics(metrics, { captureColdStartMetric: true }))
+        .use([
+            httpHeaderNormalizer(),
+            httpJsonBodyParser({ disableContentTypeError: true }),
+            httpCors({ credentials: true, origins: ['*'] }),
+            httpResponseSerializer({
+                serializers: [{ regex: /^application\/json$/, serializer: ({ body }) => body }],
+                defaultContentType: 'application/json'
+            }),
+            httpErrorHandler(),
+            errorLogger()
+        ])
+        .handler(baseHandler)
+```
+
+**Composition rules:**
+- Powertools middleware goes **first** in the chain (before HTTP middleware)
+- Order: `injectLambdaContext` → `captureLambdaHandler` → `logMetrics` → existing middleware
+- Powertools `injectLambdaContext` with `logEvent: true` replaces `inputOutputLogger` for API Gateway handlers — remove `inputOutputLogger` to avoid duplicate logging
+- For SQS handlers, keep `inputOutputLogger` alongside Powertools if you need raw event logging
+
+### Testing with Powertools
+
+```typescript
+import { describe, it, expect, vi, beforeEach } from 'vitest'
+
+// Mock Powertools before importing handler
+vi.mock('@aws-lambda-powertools/logger', () => ({
+    Logger: vi.fn().mockImplementation(() => ({
+        info: vi.fn(),
+        error: vi.fn(),
+        warn: vi.fn(),
+        debug: vi.fn(),
+        createChild: vi.fn().mockReturnThis(),
+        addContext: vi.fn()
+    }))
+}))
+
+vi.mock('@aws-lambda-powertools/tracer', () => ({
+    Tracer: vi.fn().mockImplementation(() => ({
+        getSegment: vi.fn(),
+        captureAWSv3Client: vi.fn((client) => client),
+        addAnnotation: vi.fn(),
+        addMetadata: vi.fn()
+    }))
+}))
+
+vi.mock('@aws-lambda-powertools/metrics', () => ({
+    Metrics: vi.fn().mockImplementation(() => ({
+        addMetric: vi.fn(),
+        addDimension: vi.fn(),
+        publishStoredMetrics: vi.fn()
+    })),
+    MetricUnit: { Count: 'Count', Milliseconds: 'Milliseconds' }
+}))
+
+// Mock Powertools middleware as passthrough
+vi.mock('@aws-lambda-powertools/logger/middleware', () => ({
+    injectLambdaContext: vi.fn().mockReturnValue({ before: vi.fn(), after: vi.fn() })
+}))
+vi.mock('@aws-lambda-powertools/tracer/middleware', () => ({
+    captureLambdaHandler: vi.fn().mockReturnValue({ before: vi.fn(), after: vi.fn() })
+}))
+vi.mock('@aws-lambda-powertools/metrics/middleware', () => ({
+    logMetrics: vi.fn().mockReturnValue({ before: vi.fn(), after: vi.fn() })
+}))
+```
+
+**Testing rules:**
+- Mock Powertools utilities before importing the handler module
+- Mock middleware as passthrough objects with `before`/`after` functions
+- Use `captureAWSv3Client` mock that returns the original client (pass-through)
+- Verify logger calls for important log statements (`logger.info`, `logger.error`)
+- Never rely on Powertools behavior in unit tests — test your business logic, not the framework
+
+---
+
+## 16. CloudFormation Conventions
 
 - Template in `cloudformation/template/infrastructure.yaml`
 - Per-environment config in `cloudformation/conf/<env>/infrastructure_configuration.json`

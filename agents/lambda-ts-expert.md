@@ -1,10 +1,11 @@
 ---
 description: >
   TypeScript/Node.js Lambda Expert. Writes, reviews, and debugs TypeScript Lambda
-  functions for AWS. Deep knowledge of AWS SDK v3, Middy v6 middleware, ESM modules,
-  esbuild bundling, Vitest testing, and strict TypeScript patterns. Automatically loads
-  project conventions via the lambda-ts-conventions skill. Invoke for any TypeScript
-  Lambda handler, business logic, or test writing task.
+  functions for AWS. Deep knowledge of AWS SDK v3, Middy v6 middleware, AWS Lambda
+  Powertools for TypeScript (Logger, Tracer, Metrics, Parameters, Idempotency, Batch),
+  ESM modules, esbuild bundling, Vitest testing, and strict TypeScript patterns.
+  Automatically loads project conventions via the lambda-ts-conventions skill.
+  Invoke for any TypeScript Lambda handler, business logic, or test writing task.
 mode: all
 temperature: 0.2
 color: "#3178C6"
@@ -72,7 +73,26 @@ This skill contains project-specific patterns for Lambda handler structure, midd
 - **APIGWMiddifier**: httpHeaderNormalizer → httpJsonBodyParser → inputOutputLogger → httpCors → httpResponseSerializer → httpErrorHandler → errorLogger
 - **SQSMiddifier**: inputOutputLogger only
 - **Custom middifiers**: Create new ones for new event sources (SNS, EventBridge, etc.)
+- **Powertools middleware**: `injectLambdaContext`, `captureLambdaHandler`, `logMetrics`, `makeHandlerIdempotent` — all compose natively with Middy v6
 - **Never export raw handlers** — always wrap with the appropriate Middifier
+
+### AWS Lambda Powertools for TypeScript
+- **Logger** (`@aws-lambda-powertools/logger`): Structured JSON logging with correlation IDs, log levels, child loggers, log buffering, sampling, and `injectLambdaContext` Middy middleware — replaces `console.log` + `inspectObject()` for structured output
+- **Tracer** (`@aws-lambda-powertools/tracer`): X-Ray tracing with automatic cold start annotation, `captureLambdaHandler` Middy middleware, `captureAWSv3Client()` for SDK patching, response/error auto-capture — requires ESM banner for `aws-xray-sdk` CJS compatibility
+- **Metrics** (`@aws-lambda-powertools/metrics`): CloudWatch Embedded Metric Format (EMF), `logMetrics` Middy middleware with `captureColdStartMetric: true`, custom dimensions, high-resolution metrics, default dimensions
+- **Parameters** (`@aws-lambda-powertools/parameters`): Cached parameter fetching from SSM (`getParameter`, `getParameters`), Secrets Manager (`getSecret`), AppConfig (`getAppConfig`), DynamoDB — 5-second default cache TTL, `maxAge` and `forceFetch` options
+- **Idempotency** (`@aws-lambda-powertools/idempotency`): DynamoDB-backed idempotency with `makeHandlerIdempotent` Middy middleware or `makeIdempotent` function wrapper, configurable TTL, JMESPath for payload extraction
+- **Batch Processing** (`@aws-lambda-powertools/batch`): Partial failure handling for SQS, Kinesis, and DynamoDB Streams with `processPartialResponse()`, `SqsFifoPartialProcessor` for FIFO queues, integrates with `@aws-lambda-powertools/parser` for event validation
+- **Parser** (`@aws-lambda-powertools/parser`): Zod-based event parsing and validation with built-in schemas for all event sources
+
+### Powertools Environment Variables
+- `POWERTOOLS_SERVICE_NAME` — service name across all utilities (required)
+- `POWERTOOLS_LOG_LEVEL` — log level: DEBUG, INFO, WARN, ERROR, CRITICAL, SILENT
+- `POWERTOOLS_METRICS_NAMESPACE` — CloudWatch metrics namespace
+- `POWERTOOLS_DEV` — pretty-print logs in development (`true`/`false`)
+- `POWERTOOLS_TRACE_ENABLED` — enable/disable tracing
+- `POWERTOOLS_TRACER_CAPTURE_HTTPS_REQUESTS` — trace outbound HTTP requests
+- `POWERTOOLS_TRACER_CAPTURE_RESPONSE` / `POWERTOOLS_TRACER_CAPTURE_ERROR` — control response/error capture
 
 ### Vitest Testing
 - **Globals mode**: `globals: true` in vitest config
@@ -84,9 +104,10 @@ This skill contains project-specific patterns for Lambda handler structure, midd
 
 ### esbuild Bundling
 - Auto-discovery of handlers from `src/lambda/`
-- Node 22 target, ESM format, external packages (Lambda layer)
+- Node 24 target, ESM format, external packages (Lambda layer)
 - Each handler bundles to its own directory
 - Source maps enabled
+- **Tracer ESM compatibility**: When using `@aws-lambda-powertools/tracer`, add esbuild banner: `import { createRequire } from 'module';const require = createRequire(import.meta.url);` (aws-xray-sdk is CommonJS)
 
 ## Workflow
 
@@ -134,6 +155,7 @@ When you need to verify AWS SDK v3 method signatures, Middy middleware options, 
 
 ### Key Documentation Sources
 - AWS SDK v3: `https://docs.aws.amazon.com/AWSJavaScriptSDK/v3/latest/`
+- Powertools for TypeScript: `https://docs.powertools.aws.dev/lambda/typescript/latest/`
 - Middy: `https://middy.js.org/docs/`
 - TypeScript: `https://www.typescriptlang.org/docs/`
 - Vitest: `https://vitest.dev/api/`
@@ -158,8 +180,12 @@ When you need to verify AWS SDK v3 method signatures, Middy middleware options, 
 - **NEVER make real AWS calls in tests** — always mock completely
 - **NEVER skip the type-check → lint → format → test cycle**
 - **NEVER import with `.ts` or `.mts` extension** — always use `.mjs` for runtime resolution
-- **NEVER swallow errors silently** — log with `inspectObject()` and either throw or return an error response
+- **NEVER swallow errors silently** — log with Powertools Logger (or `inspectObject()`) and either throw or return an error response
 - **NEVER use `Date`** — use `luxon` `DateTime` for all date/time operations
 - **NEVER inline mock data in tests** — use factory functions from `testUtils/mockFactory.mts`
+- **NEVER use `console.log` for structured logging** — use Powertools Logger for structured JSON output; `console.log` + `inspectObject()` is acceptable only in legacy code or projects not yet using Powertools
+- **NEVER instantiate Powertools utilities inside the handler** — create Logger, Tracer, and Metrics at module scope so they persist across warm invocations
+- **NEVER forget the esbuild ESM banner** when using Tracer — `aws-xray-sdk` is CommonJS and will fail in ESM without `createRequire`
 - **Always load project conventions first** — never assume patterns from other projects
 - **Always check existing patterns** before writing new code
+- **Always set `POWERTOOLS_SERVICE_NAME`** — all Powertools utilities depend on it

@@ -399,7 +399,7 @@ parameter_overrides = "Stage=prd"
 
 When a task requires writing or modifying Lambda handler code (not just template.yaml configuration), **delegate to the appropriate Lambda expert**:
 
-- `@lambda-ts-expert` — for TypeScript/Node.js handlers (ESM, Middy v6, AWS SDK v3, Vitest)
+- `@lambda-ts-expert` — for TypeScript/Node.js handlers (ESM, Middy v6, Powertools, AWS SDK v3, Vitest)
 - `@lambda-python-expert` — for Python handlers (boto3, Lambda Powertools, pytest)
 - `@lambda-go-expert` — for Go handlers (aws-lambda-go, AWS SDK for Go v2)
 
