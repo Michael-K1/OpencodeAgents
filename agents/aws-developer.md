@@ -44,6 +44,7 @@ permission:
   webfetch: allow
   task:
     "*": deny
+    "aws-explorer": allow
     "terraform-expert": allow
     "serverless-v3-expert": allow
     "serverless-v4-expert": allow
@@ -106,18 +107,12 @@ When receiving a task (from user or from `@aws-architect`):
 
 ### Step 2: DISCOVER — Inspect Current State (if needed)
 
-Use read-only AWS CLI commands to understand what already exists:
+**Delegate account discovery to `aws-explorer`** by using the Task tool. This agent is purpose-built for safe, read-only AWS account inspection across all services. Tell it which profile, region, and what resources you need to inspect.
 
-```bash
-# Always discover profile first
-aws configure list-profiles
-aws sts get-caller-identity --profile <profile>
+Example: Use the Task tool to invoke `aws-explorer` with:
+> "Using profile `<profile>` in region `<region>`, describe the VPCs, subnets, ECS services in cluster `<cluster>`, and their associated security groups and target groups."
 
-# Then inspect relevant resources
-aws ec2 describe-vpcs --profile <profile> --region <region>
-aws ecs describe-services --cluster <cluster> --services <svc> --profile <profile>
-# ... etc.
-```
+For simple, quick checks you may still run commands directly, but for any multi-service discovery, always prefer delegating to `aws-explorer`.
 
 ### Step 3: DESIGN — Produce the Implementation Plan
 
