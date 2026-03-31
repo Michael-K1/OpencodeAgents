@@ -12,6 +12,9 @@ permission:
     "mkdir *": allow
     "tree *": allow
   webfetch: allow
+  task:
+    "*": deny
+    "explore": allow
   skill:
     "opencode-agents": allow
 ---

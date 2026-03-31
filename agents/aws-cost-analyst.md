@@ -12,7 +12,9 @@ permission:
   edit: deny
   bash:
     "*": ask
-    "aws ce *": allow
+    "aws ce get-*": allow
+    "aws ce list-*": allow
+    "aws ce describe-*": allow
     "aws cur *": allow
     "aws pricing *": allow
     "aws budgets *": allow
