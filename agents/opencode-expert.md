@@ -9,13 +9,13 @@ permission:
     "*": ask
     "ls *": allow
     "cat *": allow
-    "mkdir *": allow
     "tree *": allow
   webfetch: allow
   task:
     "*": deny
     "explore": allow
   skill:
+    "*": deny
     "opencode-agents": allow
 ---
 

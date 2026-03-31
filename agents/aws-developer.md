@@ -42,6 +42,7 @@ permission:
     "git status*": allow
     "git diff*": allow
     "git log*": allow
+    "git show*": allow
   webfetch: allow
   task:
     "*": deny
