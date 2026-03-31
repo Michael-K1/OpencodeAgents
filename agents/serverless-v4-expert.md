@@ -4,13 +4,16 @@ description: >
   configurations for Serverless Framework version 4.x. Deep knowledge of v4's
   new features: ESM support, composable configurations, new variable system,
   stages configuration, updated IAM model, and deployment model changes.
-  Invoke for any Serverless Framework v4 project work.
+  Delegates Lambda handler code to language-specific experts (@lambda-ts-expert,
+  @lambda-python-expert, @lambda-go-expert). Invoke for any Serverless
+  Framework v4 project work.
 mode: all
 temperature: 0.2
 color: "#FD5750"
 permission:
   edit: ask
   bash:
+    "*": ask
     "sls --version*": allow
     "serverless --version*": allow
     "sls print*": allow
@@ -29,11 +32,14 @@ permission:
     "git status*": allow
     "git diff*": allow
     "git log*": allow
-    "*": ask
   webfetch: allow
   task:
-    "explore": allow
     "*": deny
+    "explore": allow
+    "lambda-ts-expert": allow
+    "lambda-python-expert": allow
+    "lambda-go-expert": allow
+    "aws-librarian": allow
   skill:
     "*": allow
 ---
@@ -291,6 +297,21 @@ Key migration steps:
 4. **Validate** with `sls print --stage <stage>` to see resolved configuration
 5. **Package** with `sls package --stage <stage>` to verify bundling
 6. **Test locally** with `sls dev` or `sls invoke local -f functionName`
+
+## Lambda Handler Delegation
+
+When a task requires writing or modifying Lambda handler code (not just serverless.yml configuration), **delegate to the appropriate Lambda expert**:
+
+- `@lambda-ts-expert` — for TypeScript/Node.js handlers (ESM, Middy v6, AWS SDK v3, Vitest)
+- `@lambda-python-expert` — for Python handlers (boto3, Lambda Powertools, pytest)
+- `@lambda-go-expert` — for Go handlers (aws-lambda-go, AWS SDK for Go v2)
+
+Provide the Lambda expert with:
+- The function's **event source type** (API Gateway, SQS, S3, Schedule, etc.)
+- **Environment variables** the handler will receive
+- **IAM permissions** available to the function (from `provider.iam.role.statements`)
+- **Business logic requirements**
+- The **project's existing handler patterns** if any exist
 
 ## Guardrails
 

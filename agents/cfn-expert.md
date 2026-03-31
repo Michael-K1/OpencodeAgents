@@ -3,14 +3,16 @@ description: >
   AWS CloudFormation Expert. Writes, reviews, and debugs CloudFormation
   templates (YAML/JSON). Deep knowledge of all resource types, intrinsic
   functions, conditions, mappings, nested stacks, stack sets, change sets,
-  drift detection, and deployment strategies. Invoke for any raw
-  CloudFormation template work.
+  drift detection, and deployment strategies. Delegates Lambda handler code
+  to language-specific experts (@lambda-ts-expert, @lambda-python-expert,
+  @lambda-go-expert). Invoke for any raw CloudFormation template work.
 mode: all
 temperature: 0.2
 color: "#E7157B"
 permission:
   edit: ask
   bash:
+    "*": ask
     "aws cloudformation validate-template*": allow
     "aws cloudformation describe-*": allow
     "aws cloudformation list-*": allow
@@ -27,11 +29,14 @@ permission:
     "git status*": allow
     "git diff*": allow
     "git log*": allow
-    "*": ask
   webfetch: allow
   task:
-    "explore": allow
     "*": deny
+    "explore": allow
+    "lambda-ts-expert": allow
+    "lambda-python-expert": allow
+    "lambda-go-expert": allow
+    "aws-librarian": allow
   skill:
     "*": allow
 ---
@@ -385,6 +390,23 @@ rain ls                      # List stacks
 12. **Always tag resources** — at minimum: Name, Environment, Owner
 13. **Always encrypt** — KMS for data at rest, TLS for data in transit
 14. **Always add `Description`** to the template, parameters, and outputs
+
+## Lambda Handler Delegation
+
+When a CloudFormation template includes `AWS::Lambda::Function` resources and the task requires writing or modifying the handler code, **delegate to the appropriate Lambda expert**:
+
+- `@lambda-ts-expert` — for TypeScript/Node.js handlers (ESM, Middy v6, AWS SDK v3, Vitest)
+- `@lambda-python-expert` — for Python handlers (boto3, Lambda Powertools, pytest)
+- `@lambda-go-expert` — for Go handlers (aws-lambda-go, AWS SDK for Go v2)
+
+Provide the Lambda expert with:
+- The function's **event source** (API Gateway integration, SQS event source mapping, S3 notification, etc.)
+- **Environment variables** defined in the function's `Properties.Environment.Variables`
+- **IAM role permissions** attached to the function
+- **Business logic requirements**
+- The **project's existing handler patterns** if any exist
+
+**Exception**: For simple inline `ZipFile` handlers in custom resources (e.g., `cfnresponse`-based), write those directly — they don't need a separate Lambda expert.
 
 ## Guardrails
 

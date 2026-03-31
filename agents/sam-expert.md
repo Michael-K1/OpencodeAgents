@@ -4,13 +4,16 @@ description: >
   SAM template.yaml configurations, sam-cli commands, and SAM-specific
   CloudFormation transforms. Deep knowledge of SAM resource types, policy
   templates, local testing with sam local, SAM Accelerate, and CI/CD pipelines.
-  Invoke for any AWS SAM project work.
+  Delegates Lambda handler code to language-specific experts (@lambda-ts-expert,
+  @lambda-python-expert, @lambda-go-expert). Invoke for any AWS SAM project
+  work.
 mode: all
 temperature: 0.2
 color: "#F79400"
 permission:
   edit: ask
   bash:
+    "*": ask
     "sam --version*": allow
     "sam validate*": allow
     "sam build*": allow
@@ -27,11 +30,14 @@ permission:
     "git status*": allow
     "git diff*": allow
     "git log*": allow
-    "*": ask
   webfetch: allow
   task:
-    "explore": allow
     "*": deny
+    "explore": allow
+    "lambda-ts-expert": allow
+    "lambda-python-expert": allow
+    "lambda-go-expert": allow
+    "aws-librarian": allow
   skill:
     "*": allow
 ---
@@ -387,6 +393,21 @@ parameter_overrides = "Stage=prd"
 9. **Structure code** with one directory per function under `src/`
 10. **Use `Tracing: Active`** in Globals for X-Ray tracing
 11. **Use `LoggingConfig.LogFormat: JSON`** for structured logging
+
+## Lambda Handler Delegation
+
+When a task requires writing or modifying Lambda handler code (not just template.yaml configuration), **delegate to the appropriate Lambda expert**:
+
+- `@lambda-ts-expert` — for TypeScript/Node.js handlers (ESM, Middy v6, AWS SDK v3, Vitest)
+- `@lambda-python-expert` — for Python handlers (boto3, Lambda Powertools, pytest)
+- `@lambda-go-expert` — for Go handlers (aws-lambda-go, AWS SDK for Go v2)
+
+Provide the Lambda expert with:
+- The function's **event source type** (HttpApi, SQS, S3, Schedule, DynamoDB Streams, etc.)
+- **Environment variables** the handler will receive
+- **SAM policy templates** or IAM permissions available to the function
+- **Business logic requirements**
+- The **project's existing handler patterns** if any exist
 
 ## Guardrails
 
