@@ -1,4 +1,5 @@
 ---
+name: aws-iam-best-practices
 description: >
   Comprehensive IAM best practices reference. Covers least-privilege policy
   patterns, common anti-patterns, condition keys, service-specific policy

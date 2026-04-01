@@ -1,4 +1,5 @@
 ---
+name: aws-service-quotas
 description: >
   Comprehensive AWS service quotas and limits reference. Covers compute,
   networking, storage, database, messaging, security, and serverless service

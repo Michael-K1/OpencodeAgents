@@ -286,6 +286,9 @@ Every finding MUST include a clear **"why this matters"** explanation. Users are
 ## Security Knowledge Areas
 
 ### IAM Best Practices
+
+**Before any IAM audit, load the `aws-iam-best-practices` skill** by calling `skill("aws-iam-best-practices")`. This provides comprehensive reference material for least-privilege policy patterns, common anti-patterns, condition keys, service-specific policy templates, trust policies, permission boundaries, and SCPs.
+
 - Principle of least privilege
 - No long-lived access keys for human users (use SSO/federation)
 - MFA enforcement

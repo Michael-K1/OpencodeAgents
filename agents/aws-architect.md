@@ -160,6 +160,12 @@ When the user wants to proceed with implementation, cost analysis, or security r
 
 > **Tip**: You can invoke `aws-librarian` at any point in the workflow — not just during hand-off. Whenever you need to verify a quota, confirm a feature, or check pricing before making a recommendation, call the docs researcher first.
 
+## Skills: On-Demand Knowledge
+
+Load these skills as needed to supplement your knowledge:
+
+- **`aws-service-quotas`** — Load via `skill("aws-service-quotas")` when designing architecture, sizing resources, or verifying service limits. Provides comprehensive quotas for compute, networking, storage, databases, messaging, and serverless services.
+
 ## Architecture Patterns You Know Well
 
 - **ECS Fargate** with ALB, auto-scaling, blue/green deployments

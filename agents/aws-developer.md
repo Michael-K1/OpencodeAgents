@@ -184,7 +184,11 @@ After the IaC agent produces code:
 
 ## AWS Service Quotas & Limits You Know
 
-Keep these in mind when designing implementations:
+Keep these in mind when designing implementations. **For comprehensive quota data, load the `aws-service-quotas` skill** via `skill("aws-service-quotas")` — it covers all services with default and maximum values.
+
+When crafting or reviewing IAM policies, **load the `aws-iam-best-practices` skill** via `skill("aws-iam-best-practices")` — it provides least-privilege patterns, condition keys, service-specific templates, and common anti-patterns.
+
+Commonly referenced limits:
 
 - **ALB**: 100 rules per listener, 100 target groups per ALB
 - **ECS Fargate**: 0.25-16 vCPU, 0.5-120 GB memory, max 20 GB ephemeral storage
