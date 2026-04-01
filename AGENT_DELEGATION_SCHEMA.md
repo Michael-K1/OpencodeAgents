@@ -98,7 +98,7 @@ These agents write Lambda handler code, business logic, and tests. They are invo
 
 | Agent | Language | Runtime | Key Libraries |
 |-------|----------|---------|--------------|
-| **lambda-ts-expert** | TypeScript | Node.js 22 (ESM) | Middy v6, AWS SDK v3, Vitest |
+| **lambda-ts-expert** | TypeScript | Node.js 24 (ESM) | Middy v6, AWS SDK v3, Vitest |
 | **lambda-python-expert** | Python | Python 3.12+ | boto3, Lambda Powertools, pytest |
 | **lambda-go-expert** | Go | Go 1.22+ | aws-lambda-go, AWS SDK for Go v2 |
 
@@ -231,14 +231,14 @@ User → aws-developer
 | serverless-v4-expert | read-only | ask | allow | explore + Lambda experts + docs | allow |
 | sam-expert | read-only | ask | allow | explore + Lambda experts + docs | allow |
 | cfn-expert | read-only | ask | allow | explore + Lambda experts + docs | allow |
-| lambda-ts-expert | limited (test/lint) | ask | allow | docs only | allow |
-| lambda-python-expert | limited (test/lint) | ask | allow | docs only | allow |
-| lambda-go-expert | limited (test/lint) | ask | allow | docs only | allow |
+| lambda-ts-expert | limited (test/lint) | allow | allow | docs only | allow |
+| lambda-python-expert | limited (test/lint) | allow | allow | docs only | allow |
+| lambda-go-expert | limited (test/lint) | allow | allow | docs only | allow |
 | aws-librarian | none | deny | allow | none | allow |
 
 **Key Principles:**
 - All agents are **read-only** for AWS account inspection
-- No agent modifies files without `ask` permission
+- Most agents require `ask` approval to modify files; Lambda experts have `allow` for fast code generation
 - **aws-librarian** has the most restricted access (webfetch only)
 - Specific bash patterns use whitelist approach: `"*": ask` (default) → specific allows/denies
 
