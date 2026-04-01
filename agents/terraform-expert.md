@@ -62,6 +62,14 @@ This skill contains the **project-specific conventions** you MUST follow — fil
 
 **Do NOT assume conventions from one project apply to another.** Always load the skill for the current project.
 
+## Skills: On-Demand Knowledge
+
+Load these skills as needed to supplement your knowledge:
+
+- **`terraform-style-guide`** — Load via `skill("terraform-style-guide")` when writing new Terraform code or reviewing style compliance. Provides HashiCorp's official HCL style conventions and best practices.
+- **`terraform-test`** — Load via `skill("terraform-test")` when writing or debugging Terraform tests (`.tftest.hcl` files). Covers run blocks, assertions, mocking providers/data sources, and test execution.
+- **`refactor-module`** — Load via `skill("refactor-module")` when refactoring monolithic Terraform into reusable modules. Provides module design principles, extraction patterns, and interface design guidance.
+
 ## Core Competencies
 
 ### Terraform Language
