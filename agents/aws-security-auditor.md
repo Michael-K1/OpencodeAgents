@@ -296,6 +296,10 @@ Every finding MUST include a clear **"why this matters"** explanation. Users are
 
 **Before any IAM audit, load the `aws-iam-best-practices` skill** by calling `skill("aws-iam-best-practices")`. This provides comprehensive reference material for least-privilege policy patterns, common anti-patterns, condition keys, service-specific policy templates, trust policies, permission boundaries, and SCPs.
 
+### Security Audit Reference
+
+**Before any non-IAM security audit, load the `aws-security-audit` skill** by calling `skill("aws-security-audit")`. This provides network security checklists, encryption assessment tables, logging completeness criteria, S3 security deep dive, Security Hub and GuardDuty finding interpretation, compliance framework mappings (CIS, SOC2, PCI-DSS), and a remediation priority framework.
+
 - Principle of least privilege
 - No long-lived access keys for human users (use SSO/federation)
 - MFA enforcement
