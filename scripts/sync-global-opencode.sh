@@ -313,10 +313,22 @@ sync_commands() {
 commit_and_push() {
   log_section "Git operations"
 
-  # Check if there are any changes
+  # Check if there are any changes (tracked or untracked)
   cd "$PROJECT_ROOT"
 
-  if git diff --quiet --exit-code 2>/dev/null && git diff --quiet --cached --exit-code 2>/dev/null; then
+  local has_tracked_changes=false
+  local has_untracked_files=false
+
+  if ! git diff --quiet --exit-code 2>/dev/null || ! git diff --quiet --cached --exit-code 2>/dev/null; then
+    has_tracked_changes=true
+  fi
+
+  # Check for untracked files in target directories (git diff misses these)
+  if [[ -n "$(git ls-files --others --exclude-standard agents/ skills/ commands/ 2>/dev/null)" ]]; then
+    has_untracked_files=true
+  fi
+
+  if [[ "$has_tracked_changes" == false && "$has_untracked_files" == false ]]; then
     log_success "No changes to commit"
     return 0
   fi
