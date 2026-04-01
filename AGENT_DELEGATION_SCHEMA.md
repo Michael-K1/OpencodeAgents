@@ -354,4 +354,15 @@ The delegation pattern remains consistent:
 - `agents/lambda-go-expert.md` - Go Lambda handler expert
 - `agents/docs-writer.md` - Documentation writer
 - `agents/opencode-expert.md` - OpenCode agent configuration expert
+- `agents/ai-sensei.md` - AI/ML teaching agent
+- `agents/incident-responder.md` - Production incident diagnosis
 - `skills/lambda-ts-conventions/SKILL.md` - TypeScript Lambda project conventions
+- `skills/lambda-delegation/SKILL.md` - Shared Lambda delegation protocol
+- `skills/aws-iam-best-practices/SKILL.md` - IAM policy patterns and best practices
+- `skills/aws-security-audit/SKILL.md` - Security audit checklists and compliance frameworks
+- `skills/aws-service-quotas/SKILL.md` - AWS service limits reference
+- `skills/aws-readonly-apis/SKILL.md` - Safe read-only AWS CLI commands
+- `skills/terraform-style-guide/SKILL.md` - HashiCorp HCL style conventions
+- `skills/terraform-test/SKILL.md` - Terraform native testing framework
+- `skills/refactor-module/SKILL.md` - Terraform monolith-to-module refactoring
+- `skills/opencode-agents/SKILL.md` - OpenCode agent creation reference
