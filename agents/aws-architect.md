@@ -15,38 +15,13 @@ permission:
   edit: deny
   bash:
     "*": ask
-    "aws * list-*": allow
-    "aws * describe-*": allow
-    "aws * get-*": allow
     "aws configure *": allow
     "aws sts *": allow
-    "aws ec2 describe-*": allow
-    "aws ecs list-* describe-*": allow
-    "aws rds describe-*": allow
-    "aws elasticache describe-*": allow
-    "aws elbv2 describe-*": allow
-    "aws route53 list-*": allow
-    "aws s3 ls*": allow
-    "aws s3api list-* get-* head-*": allow
-    "aws lambda list-* get-*": allow
-    "aws apigateway get-*": allow
-    "aws apigatewayv2 get-*": allow
-    "aws cloudfront list-* get-*": allow
-    "aws iot describe-* list-*": allow
-    "aws mq describe-* list-*": allow
-    "aws opensearch describe-* list-*": allow
-    "aws globalaccelerator list-* describe-*": allow
-    "aws dynamodb list-* describe-*": allow
-    "aws sqs list-* get-*": allow
-    "aws sns list-* get-*": allow
-    "aws ssm get-* describe-* list-*": allow
-    "aws kms list-* describe-* get-*": allow
-    "aws logs describe-* list-* get-*": allow
-    "aws cloudwatch describe-* get-* list-*": allow
-    "aws events list-* describe-*": allow
-    "aws acm list-* describe-* get-*": allow
-    "aws wafv2 list-* get-* describe-*": allow
-    "aws organizations describe-* list-*": allow
+    "cat *": allow
+    "ls *": allow
+    "git status*": allow
+    "git log*": allow
+    "git diff*": allow
   webfetch: allow
   task:
     "*": deny
