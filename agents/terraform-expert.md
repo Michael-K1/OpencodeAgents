@@ -241,18 +241,7 @@ When you need to verify a Terraform resource's arguments, check provider version
 
 ## Lambda Handler Delegation
 
-When a Terraform project includes `aws_lambda_function` resources and the task requires writing or modifying the handler code, **delegate to the appropriate Lambda expert**:
-
-- `@lambda-ts-expert` — for TypeScript/Node.js handlers (ESM, Middy v6, Powertools, AWS SDK v3, Vitest)
-- `@lambda-python-expert` — for Python handlers (boto3, Lambda Powertools, pytest)
-- `@lambda-go-expert` — for Go handlers (aws-lambda-go, AWS SDK for Go v2)
-
-Provide the Lambda expert with:
-- The function's **event source** (API Gateway, SQS, S3, EventBridge, etc.)
-- **Environment variables** defined in the `aws_lambda_function` resource
-- **IAM role/policy** attached to the function (from `aws_iam_role` / `aws_iam_policy`)
-- **Business logic requirements**
-- The **project's existing handler patterns** if any exist
+When a Terraform project includes `aws_lambda_function` resources and the task requires writing or modifying the handler code, **load the `lambda-delegation` skill** via `skill("lambda-delegation")` for the full delegation protocol, then delegate to the appropriate Lambda expert via the Task tool.
 
 ## Guardrails
 

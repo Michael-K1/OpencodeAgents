@@ -167,9 +167,8 @@ Pass the implementation brief (or direct instructions) to the appropriate sub-ag
 - `@cfn-expert` — for raw CloudFormation YAML/JSON
 
 **Lambda Expert Agents** (for handler code, business logic, and tests):
-- `@lambda-ts-expert` — for TypeScript Lambda handlers (Node.js 24, ESM, Middy v6, Powertools, AWS SDK v3, Vitest)
-- `@lambda-python-expert` — for Python Lambda handlers (boto3, Lambda Powertools, pytest)
-- `@lambda-go-expert` — for Go Lambda handlers (aws-lambda-go, AWS SDK for Go v2)
+
+When the task involves Lambda handler code, **load the `lambda-delegation` skill** via `skill("lambda-delegation")` for the full delegation protocol (agent list, what context to provide, when to delegate vs. write directly). Then delegate to the appropriate Lambda expert (`@lambda-ts-expert`, `@lambda-python-expert`, or `@lambda-go-expert`) via the Task tool.
 
 When a task requires **both** IaC and handler code, delegate to the IaC agent for infrastructure and separately to the appropriate Lambda expert for the handler implementation. They can work in parallel.
 

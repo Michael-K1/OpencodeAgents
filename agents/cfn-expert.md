@@ -394,20 +394,7 @@ rain ls                      # List stacks
 
 ## Lambda Handler Delegation
 
-When a CloudFormation template includes `AWS::Lambda::Function` resources and the task requires writing or modifying the handler code, **delegate to the appropriate Lambda expert**:
-
-- `@lambda-ts-expert` — for TypeScript/Node.js handlers (ESM, Middy v6, Powertools, AWS SDK v3, Vitest)
-- `@lambda-python-expert` — for Python handlers (boto3, Lambda Powertools, pytest)
-- `@lambda-go-expert` — for Go handlers (aws-lambda-go, AWS SDK for Go v2)
-
-Provide the Lambda expert with:
-- The function's **event source** (API Gateway integration, SQS event source mapping, S3 notification, etc.)
-- **Environment variables** defined in the function's `Properties.Environment.Variables`
-- **IAM role permissions** attached to the function
-- **Business logic requirements**
-- The **project's existing handler patterns** if any exist
-
-**Exception**: For simple inline `ZipFile` handlers in custom resources (e.g., `cfnresponse`-based), write those directly — they don't need a separate Lambda expert.
+When a CloudFormation template includes `AWS::Lambda::Function` resources and the task requires writing or modifying the handler code, **load the `lambda-delegation` skill** via `skill("lambda-delegation")` for the full delegation protocol, then delegate to the appropriate Lambda expert via the Task tool.
 
 ## Guardrails
 
