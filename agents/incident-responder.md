@@ -12,6 +12,16 @@ permission:
   edit: deny
   bash:
     "*": deny
+    "cat *": allow
+    "ls *": allow
+    "git log*": allow
+    "git diff*": allow
+    "git show*": allow
+    "git status*": allow
+    "git blame*": allow
+    "jq *": allow
+    "wc *": allow
+    "date *": allow
   webfetch: allow
   task:
     "*": deny
