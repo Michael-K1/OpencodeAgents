@@ -13,6 +13,11 @@ agents/                     # Agent definitions (Markdown + YAML frontmatter)
 skills/                     # Skill reference documents
   <skill-name>/             # Directory name must match `name` in frontmatter
     SKILL.md                # Skill content (uppercase filename, always SKILL.md)
+commands/                   # Custom slash commands (Markdown)
+  <command-name>.md         # One file per command, filename = /command-name
+scripts/                    # Utility scripts
+  validate-agents.sh        # Validate agent and skill configurations
+  sync-global-opencode.sh   # Sync global ~/.config/opencode/ to this repo
 package.json                # Declares @opencode-ai/plugin dependency (for future tools/plugins)
 ```
 
