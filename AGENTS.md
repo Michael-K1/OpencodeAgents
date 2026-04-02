@@ -23,12 +23,14 @@ package.json                # Declares @opencode-ai/plugin dependency (for futur
 
 ## Build / Lint / Test
 
-There are no build, lint, or test commands. The repository contains only Markdown
+There are no build or compile steps. The repository contains only Markdown
 and JSON configuration files.
 
 - **Package manager**: Bun (install with `bun install`)
-- **Validation**: Review YAML frontmatter manually -- ensure all required fields
-  are present and values match the OpenCode schema
+- **Validation**: Run `./scripts/validate-agents.sh` to check all agents and
+  skills for frontmatter correctness, wildcard ordering, task target validity,
+  and skill naming conventions. Use `--verbose` for detailed output or
+  `--global` to validate `~/.config/opencode/` instead
 - **Single-file check**: Open the file and verify frontmatter parses as valid YAML
   between the `---` delimiters
 
