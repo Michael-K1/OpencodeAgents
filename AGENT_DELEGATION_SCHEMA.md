@@ -2,6 +2,40 @@
 
 This document describes the delegation flow and orchestration relationships between OpenCode agents in the AWS ecosystem.
 
+## Architecture Overview
+
+```
+                                aws-architect (Strategic Planner)
+                                        │
+                      ┌─────────────────┼─────────────────┐
+                      │                 │                 │
+                      ▼                 ▼                 ▼
+              aws-developer       aws-cost-analyst  aws-security-auditor
+           (Implementation)       (Cost Analysis)   (Security Review)
+                      │                 │                 │
+          ┌───────────┼───────────┐     │                 │
+          │           │           │     │                 │
+          ▼           ▼           ▼     │                 │
+    iac-terraform  iac-sls-*  iac-sam   │                 │
+    iac-cfn                             │                 │
+          │           │           │     │                 │
+          ├───────────┼───────────┤     │                 │
+          │  Lambda Expert Layer  │     │                 │
+          │ ┌───────────────────┐ │     │                 │
+          │ │    lambda-ts      │ │     │                 │
+          │ │  lambda-python    │ │     │                 │
+          │ │    lambda-go      │ │     │                 │
+          │ └───────────────────┘ │     │                 │
+          └───────────┼───────────┘     │                 │
+                      │                 │                 │
+                      └─────────┬───────┴─────────────────┘
+                                │
+                        ┌───────┴───────┐
+                        ▼               ▼
+              aws-librarian      aws-explorer
+         (Documentation)    (Read-Only Inspector)
+```
+
 ## Delegation DAG
 
 The agent ecosystem forms a directed acyclic graph (DAG) with five tiers. Higher-tier agents delegate tasks to lower-tier agents. Several cross-tier shortcuts exist -- these are intentional to reduce latency when a strategist or orchestrator needs a leaf-level agent directly.
