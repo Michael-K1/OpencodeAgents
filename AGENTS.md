@@ -38,7 +38,7 @@ Required frontmatter fields and key ordering:
 description: Required. Brief sentence describing what the agent does.
 mode: primary | subagent | all
 model: provider/model-id
-temperature: 0.0-1.0
+temperature: 0.0-2.0
 color: "#hexcolor"
 permission:
   edit: allow | ask | deny
