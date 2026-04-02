@@ -30,8 +30,10 @@ This document describes the delegation flow and orchestration relationships betw
                     │                   │                   │
                     └───────────┬───────┴───────────────────┘
                                 │
-                                ▼
-                aws-librarian (Documentation Specialist)
+                        ┌───────┴───────┐
+                        ▼               ▼
+          aws-librarian          aws-explorer
+     (Documentation Specialist)  (Read-Only AWS Inspector)
 ```
 
 ## Delegation Flow Details
@@ -114,6 +116,14 @@ These agents write Lambda handler code, business logic, and tests. They are invo
 - Expertise: AWS service guides, API references, quotas, pricing, best practices
 - Access: Read-only webfetch (no bash, no edit)
 - Serves: All other agents in the ecosystem
+
+#### **aws-explorer** (Read-Only AWS Inspector)
+- Role: Read-only AWS account explorer
+- Responsibility: Safe inspection of live AWS account state
+- Expertise: AWS CLI read-only commands across all services
+- Access: Bash with default deny and extensive allowlist for safe read-only AWS CLI commands; no webfetch, no edit, no task delegation
+- Skills: `aws-readonly-apis` only
+- Invoked by: **aws-architect**, **aws-developer**, **aws-cost-analyst**, **aws-security-auditor**, **incident-responder**
 
 ---
 
@@ -235,6 +245,7 @@ User → aws-developer
 | lambda-python-expert | limited (test/lint) | allow | allow | docs only | allow |
 | lambda-go-expert | limited (test/lint) | allow | allow | docs only | allow |
 | aws-librarian | none | deny | allow | none | allow |
+| aws-explorer | read-only (allow list, default deny) | deny | deny | none | restricted (aws-readonly-apis only) |
 
 **Key Principles:**
 - All agents are **read-only** for AWS account inspection
@@ -253,16 +264,20 @@ User → aws-developer
    - `aws-cost-analyst` for cost analysis
    - `aws-security-auditor` for security review
    - `aws-librarian` for documentation
+   - `aws-explorer` for read-only AWS account inspection
 
 2. **aws-developer** invokes:
    - `terraform-expert`, `serverless-v3-expert`, `serverless-v4-expert`, `sam-expert`, `cfn-expert` for IaC
    - `aws-librarian` for API reference and configuration details
+   - `aws-explorer` for read-only AWS account inspection
 
 3. **aws-cost-analyst** invokes:
    - `aws-librarian` for pricing and quota information
+   - `aws-explorer` for read-only AWS account inspection
 
 4. **aws-security-auditor** invokes:
    - `aws-librarian` for security best practices and compliance documentation
+   - `aws-explorer` for read-only AWS account inspection
 
 5. **IaC Specialists** invoke:
    - `explore` agent for codebase exploration
@@ -273,6 +288,9 @@ User → aws-developer
 6. **Lambda Expert Agents** invoke:
    - `aws-librarian` for AWS API documentation
    - No other delegations — they are leaf-level agents for code production
+
+7. **aws-explorer** invokes:
+   - No delegations — leaf-level read-only agent
 
 ---
 
