@@ -4,9 +4,9 @@ description: >
   configurations for Serverless Framework version 3.x. Deep knowledge of v3
   plugin ecosystem, provider configuration, function packaging, event sources,
   IAM role management, custom resources, and deployment stages. Delegates
-  Lambda handler code to language-specific experts (@lambda-ts-expert,
-  @lambda-python-expert, @lambda-go-expert). Invoke for any Serverless
-  Framework v3 project work.
+  Lambda handler code to language-specific experts (@lambda-ts,
+  @lambda-python, @lambda-go). Invoke for any Serverless Framework v3
+  project work.
 mode: all
 temperature: 0.2
 color: "#FF8A80"
@@ -35,9 +35,9 @@ permission:
   task:
     "*": deny
     "explore": allow
-    "lambda-ts-expert": allow
-    "lambda-python-expert": allow
-    "lambda-go-expert": allow
+    "lambda-ts": allow
+    "lambda-python": allow
+    "lambda-go": allow
     "aws-librarian": allow
   skill:
     "*": allow

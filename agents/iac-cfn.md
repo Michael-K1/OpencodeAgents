@@ -4,8 +4,8 @@ description: >
   templates (YAML/JSON). Deep knowledge of all resource types, intrinsic
   functions, conditions, mappings, nested stacks, stack sets, change sets,
   drift detection, and deployment strategies. Delegates Lambda handler code
-  to language-specific experts (@lambda-ts-expert, @lambda-python-expert,
-  @lambda-go-expert). Invoke for any raw CloudFormation template work.
+  to language-specific experts (@lambda-ts, @lambda-python,
+  @lambda-go). Invoke for any raw CloudFormation template work.
 mode: all
 temperature: 0.2
 color: "#E7157B"
@@ -34,9 +34,9 @@ permission:
   task:
     "*": deny
     "explore": allow
-    "lambda-ts-expert": allow
-    "lambda-python-expert": allow
-    "lambda-go-expert": allow
+    "lambda-ts": allow
+    "lambda-python": allow
+    "lambda-go": allow
     "aws-librarian": allow
   skill:
     "*": allow

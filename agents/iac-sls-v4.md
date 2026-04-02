@@ -4,9 +4,9 @@ description: >
   configurations for Serverless Framework version 4.x. Deep knowledge of v4's
   new features: ESM support, composable configurations, new variable system,
   stages configuration, updated IAM model, and deployment model changes.
-  Delegates Lambda handler code to language-specific experts (@lambda-ts-expert,
-  @lambda-python-expert, @lambda-go-expert). Invoke for any Serverless
-  Framework v4 project work.
+  Delegates Lambda handler code to language-specific experts (@lambda-ts,
+  @lambda-python, @lambda-go). Invoke for any Serverless Framework v4
+  project work.
 mode: all
 temperature: 0.2
 color: "#FD5750"
@@ -37,9 +37,9 @@ permission:
   task:
     "*": deny
     "explore": allow
-    "lambda-ts-expert": allow
-    "lambda-python-expert": allow
-    "lambda-go-expert": allow
+    "lambda-ts": allow
+    "lambda-python": allow
+    "lambda-go": allow
     "aws-librarian": allow
   skill:
     "*": allow

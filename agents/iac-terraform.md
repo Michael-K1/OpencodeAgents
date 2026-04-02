@@ -5,7 +5,7 @@ description: >
   module design, state management, and IaC best practices. Automatically loads
   project-specific conventions via the terraform-conventions skill when
   available. Delegates Lambda handler code to language-specific experts
-  (@lambda-ts-expert, @lambda-python-expert, @lambda-go-expert). Invoke for
+  (@lambda-ts, @lambda-python, @lambda-go). Invoke for
   any Terraform/HCL work.
 mode: all
 temperature: 0.1
@@ -41,9 +41,9 @@ permission:
     "*": deny
     "aws-librarian": allow
     "explore": allow
-    "lambda-ts-expert": allow
-    "lambda-python-expert": allow
-    "lambda-go-expert": allow
+    "lambda-ts": allow
+    "lambda-python": allow
+    "lambda-go": allow
   skill:
     "*": allow
 ---

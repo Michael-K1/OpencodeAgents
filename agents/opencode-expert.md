@@ -14,6 +14,7 @@ permission:
   task:
     "*": deny
     "explore": allow
+    "ai-sensei": allow
   skill:
     "*": deny
     "opencode-agents": allow

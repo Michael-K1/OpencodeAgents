@@ -54,10 +54,10 @@ OpencodeAgents/
 │   ├── aws-developer.md
 │   ├── aws-security-auditor.md
 │   ├── aws-cost-analyst.md
-│   ├── cfn-expert.md
-│   ├── sam-expert.md
-│   ├── serverless-v3-expert.md
-│   └── serverless-v4-expert.md
+│   ├── iac-cfn.md
+│   ├── iac-sam.md
+│   ├── iac-sls-v3.md
+│   └── iac-sls-v4.md
 └── skills/                            # Skill reference documents
     ├── opencode-agents/
     │   └── SKILL.md
@@ -80,29 +80,24 @@ Each agent is a Markdown file in `agents/` with YAML frontmatter defining its be
 | **aws-developer** | Implementation bridge between architecture decisions and IaC code; delegates to IaC specialists |
 | **aws-security-auditor** | Read-only security posture assessments using Security Hub, GuardDuty, IAM Access Analyzer, and more |
 | **aws-cost-analyst** | Cost breakdowns, optimization recommendations, savings plan analysis, and forecasting |
-| **cfn-expert** | Writes, reviews, and debugs CloudFormation templates (YAML/JSON) |
-| **sam-expert** | AWS SAM templates, sam-cli commands, local testing, and CI/CD pipelines |
-| **serverless-v3-expert** | Serverless Framework v3.x configuration, plugins, and deployment |
-| **serverless-v4-expert** | Serverless Framework v4.x with ESM support, composable configs, and updated IAM model |
+| **iac-cfn** | Writes, reviews, and debugs CloudFormation templates (YAML/JSON) |
+| **iac-sam** | AWS SAM templates, sam-cli commands, local testing, and CI/CD pipelines |
+| **iac-sls-v3** | Serverless Framework v3.x configuration, plugins, and deployment |
+| **iac-sls-v4** | Serverless Framework v4.x with ESM support, composable configs, and updated IAM model |
 
 ### Agent Delegation Hierarchy
 
-The AWS agents form a delegation tree where higher-level agents invoke specialized agents for specific tasks:
+The AWS agents form a five-tier delegation DAG where higher-tier agents invoke lower-tier specialists. Cross-tier shortcuts exist for latency reduction. The full graph has **62 edges across 18 agents with 0 cycles**.
 
-```
-aws-architect
-├── aws-developer
-│   ├── cfn-expert
-│   ├── sam-expert
-│   ├── serverless-v3-expert
-│   └── serverless-v4-expert
-├── aws-cost-analyst
-└── aws-security-auditor
+```text
+Tier 4  aws-architect ──→ aws-developer, aws-cost-analyst, aws-security-auditor, aws-explorer, aws-librarian
+Tier 3  aws-developer ──→ iac-terraform, iac-cfn, iac-sam, iac-sls-v3/v4, lambda-*, aws-explorer, aws-librarian
+Tier 2  IaC specialists + opencode-expert ──→ lambda-*, aws-librarian, explore
+Tier 1  Domain specialists ──→ aws-explorer, aws-librarian, explore
+Tier 0  aws-explorer, aws-librarian (leaf nodes -- no delegation)
 ```
 
-- **aws-architect** answers "what should we build and why?" then delegates implementation to **aws-developer**
-- **aws-developer** answers "how do we implement this?" then delegates IaC work to the appropriate specialist
-- **aws-security-auditor** and **aws-cost-analyst** are read-only agents (`edit: deny`) that provide analysis without modifying files
+See [AGENT_DELEGATION_SCHEMA.md](./AGENT_DELEGATION_SCHEMA.md) for the complete DAG with every delegation edge, the edge summary table, and context-passing best practices.
 
 ## Skills
 

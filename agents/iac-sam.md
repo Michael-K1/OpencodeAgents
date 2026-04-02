@@ -4,8 +4,8 @@ description: >
   SAM template.yaml configurations, sam-cli commands, and SAM-specific
   CloudFormation transforms. Deep knowledge of SAM resource types, policy
   templates, local testing with sam local, SAM Accelerate, and CI/CD pipelines.
-  Delegates Lambda handler code to language-specific experts (@lambda-ts-expert,
-  @lambda-python-expert, @lambda-go-expert). Invoke for any AWS SAM project
+  Delegates Lambda handler code to language-specific experts (@lambda-ts,
+  @lambda-python, @lambda-go). Invoke for any AWS SAM project
   work.
 mode: all
 temperature: 0.2
@@ -35,9 +35,9 @@ permission:
   task:
     "*": deny
     "explore": allow
-    "lambda-ts-expert": allow
-    "lambda-python-expert": allow
-    "lambda-go-expert": allow
+    "lambda-ts": allow
+    "lambda-python": allow
+    "lambda-go": allow
     "aws-librarian": allow
   skill:
     "*": allow

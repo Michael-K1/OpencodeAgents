@@ -15,9 +15,9 @@ When a task involves writing, modifying, or reviewing Lambda handler code, **del
 
 | Language | Agent | Key Technologies |
 |----------|-------|-----------------|
-| TypeScript / Node.js | `@lambda-ts-expert` | Node.js 24, ESM, Middy v6, AWS Lambda Powertools for TypeScript, AWS SDK v3, Vitest |
-| Python | `@lambda-python-expert` | boto3, AWS Lambda Powertools for Python, pydantic, pytest |
-| Go | `@lambda-go-expert` | aws-lambda-go, AWS SDK for Go v2, standard testing + testify |
+| TypeScript / Node.js | `@lambda-ts` | Node.js 24, ESM, Middy v6, AWS Lambda Powertools for TypeScript, AWS SDK v3, Vitest |
+| Python | `@lambda-python` | boto3, AWS Lambda Powertools for Python, pydantic, pytest |
+| Go | `@lambda-go` | aws-lambda-go, AWS SDK for Go v2, standard testing + testify |
 
 ## What to Provide the Lambda Expert
 
